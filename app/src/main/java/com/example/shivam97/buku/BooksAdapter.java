@@ -24,15 +24,16 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
     private Context ctx;
     private ProgressBar progressBar;
     private ArrayList<String> titles;
-    private ArrayList<String> ISBN;
+    private ArrayList<String> keys;
     private ArrayList<String> authors;
-    // private ArrayList<String> ratings;
+     private ArrayList<String> ratings;
     private ArrayList<String> url;
 
     public void setData(ArrayList<String> titles,ArrayList<String> authors,ArrayList<String> ratings){
         this.titles = titles;
         this.authors = authors;
-        //   this.ratings = ratings;
+        this.ratings = ratings;
+
         this.notifyDataSetChanged();
     }
     public void addData(String title,String author,String rating){
@@ -43,17 +44,17 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
 
     }
 
-    void addISBN(String key,String num){
-        ISBN.add(num);
+    void addKey(String key){
         initiateFirebase(key);
     }
 
     BooksAdapter(Context context,ProgressBar progressBar){
         ctx= context;this.progressBar=progressBar;
-        ISBN=new ArrayList<>();
         titles =new ArrayList<>();
         authors=new ArrayList<>();
         url=new ArrayList<>();
+        keys=new ArrayList<>();
+        ratings=new ArrayList<>();
 
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -74,8 +75,21 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
         final int i=holder.getAdapterPosition();
         Picasso.get().load(url.get(i)).into(holder.image);
         holder.title.setText(titles.get(i));
-        holder. author.setText(authors.get(i));
-        holder. rating.setText("Ratings: 4.2/5");
+        holder.author.setText(authors.get(i));
+        holder.rating.setText(ratings.get(i));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i1=new Intent(ctx,BookDeatails.class);
+                i1.putExtra("title",titles.get(i));
+                i1.putExtra("author",authors.get(i));
+                i1.putExtra("index",keys.get(i));
+                i1.putExtra("url",url.get(i));
+                i1.putExtra("rating",ratings.get(i));
+                ctx.startActivity(i1);
+
+            }
+        });
 
     }
 
@@ -103,13 +117,13 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
 
     private void initiateFirebase(final String key) {
 
-        final String[] s = new String[3];
+        final String[] s = new String[4];
 
         mDatabase.child("bookTitle").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 s[0] =dataSnapshot.getValue().toString();
-                mDatabase.child("imageUrlM").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                mDatabase.child("imageUrlL").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         s[1]=dataSnapshot.getValue().toString();
@@ -117,11 +131,24 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 s[2]= dataSnapshot.getValue().toString();
-                                titles.add(s[0]);
-                                url.add(s[1]);
-                                authors.add(s[2]);
-                                notifyDataSetChanged();
-                                progressBar.setVisibility(View.GONE);
+                               mDatabase.child("rating").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                   @Override
+                                   public void onDataChange(DataSnapshot dataSnapshot) {
+                                       s[3]=dataSnapshot.getValue().toString();
+                                       titles.add(s[0]);
+                                       url.add(s[1]);
+                                       authors.add(s[2]);
+                                       ratings.add(s[3]);
+                                       keys.add(key);
+                                       notifyDataSetChanged();
+                                       progressBar.setVisibility(View.GONE);
+                                   }
+
+                                   @Override
+                                   public void onCancelled(DatabaseError databaseError) {
+
+                                   }
+                               });
                             }
 
                             @Override

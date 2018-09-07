@@ -97,14 +97,17 @@ public class SignUpActivity extends AppCompatActivity  {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if(task.isSuccessful())
                     {
+
                         mDatabase.child("userIndex").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 int i;
                                 i=Integer.parseInt(dataSnapshot.getValue().toString())+1;
-                                DatabaseReference newUser= mDatabase.child("users").child( String.valueOf(i) );
+
+                                DatabaseReference newUser= mDatabase.child("users").child( mAuth.getCurrentUser().getUid() );
                                 newUser.child("name").setValue(name);
                                 newUser.child("age").setValue(age);
+                                newUser.child("username").setValue(String.valueOf(i));
                                 mDatabase.child("userIndex").setValue(String.valueOf(i));
                                 userIndex[0] =i;
                                 Toast.makeText(SignUpActivity.this,"Account successfully created",Toast.LENGTH_SHORT).show();

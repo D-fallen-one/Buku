@@ -40,6 +40,7 @@ import java.util.List;
 import static android.Manifest.permission.READ_CONTACTS;
 import static com.example.shivam97.buku.Buku.mAuth;
 import static com.example.shivam97.buku.Buku.mDatabase;
+import static com.example.shivam97.buku.Buku.setUsername;
 
 public class LoginActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -57,6 +58,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
             mAuth= FirebaseAuth.getInstance();
             mDatabase= FirebaseDatabase.getInstance().getReference();
+            setUsername();
+
+
+            if(mAuth.getCurrentUser()!=null) {
+                finish();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            }
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 

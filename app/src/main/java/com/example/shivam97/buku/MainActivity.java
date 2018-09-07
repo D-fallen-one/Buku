@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -24,14 +25,24 @@ import android.view.MenuItem;
 import android.widget.HorizontalScrollView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import static com.example.shivam97.buku.Buku.mAuth;
 import static com.example.shivam97.buku.Buku.mDatabase;
 
 public class MainActivity extends AppCompatActivity
@@ -42,15 +53,17 @@ public class MainActivity extends AppCompatActivity
     TextView recomm,t;
     BooksAdapter adapter;
     ProgressBar progressBar;
+    String url="http://igi627.000webhostapp.com/buku/getTopN.php";
+    RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer =  findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -76,10 +89,27 @@ public class MainActivity extends AppCompatActivity
         booksRecycler.setAdapter(adapter);
 
         booksRecycler.setLayoutManager(new GridLayoutManager(this,2));
-
         checkConnection();
+
+        requestQueue= Volley.newRequestQueue(this);
+
     }
 
+    private void execute(){
+        StringRequest stringRequest=new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.i("response",response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //execute();
+            }
+        });
+
+        requestQueue.add(stringRequest);
+    }
     private void checkConnection(){
         ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
@@ -87,18 +117,22 @@ public class MainActivity extends AppCompatActivity
             //we are connected to a network
             mDatabase= FirebaseDatabase.getInstance().getReference();
 
-            mDatabase.child("ISBN").addValueEventListener(new ValueEventListener() {
+            t.setVisibility(View.GONE);
+            Query query=mDatabase.child("bookTitle").limitToFirst(20);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    (t).setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+
                     for(DataSnapshot snapshot:dataSnapshot.getChildren()){
-                        adapter.addISBN(snapshot.getKey(),snapshot.getValue().toString());
+                        adapter.addKey(snapshot.getKey());
                     }
+
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    progressBar.setVisibility(View.GONE);
+
                 }
             });
         }
@@ -145,6 +179,11 @@ public class MainActivity extends AppCompatActivity
         }
         else if (id == R.id.nav_mybooks) {
 
+        }
+        else if(id == R.id.nav_logOut){
+            mAuth.signOut();
+            finish();
+            startActivity(new Intent(MainActivity.this,LoginActivity.class));
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

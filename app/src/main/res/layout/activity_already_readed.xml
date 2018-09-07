@@ -6,4 +6,90 @@
     android:layout_height="match_parent"
     tools:context=".AlreadyReaded">
 
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="skip"
+                android:textColor="@color/colorPrimaryDark"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="right"
+                />
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_gravity="center"
+                android:onClick="skipActivity"
+                android:src="@drawable/logo_small"
+                android:layout_height="150dp" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textColor="@color/cardview_dark_background"
+                android:text="Welcome to ReadX"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#333333"
+                android:layout_marginTop="8dp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:text="Give your rating to the books you have already readed:"
+                android:layout_marginBottom="15dp"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.SearchView
+                android:id="@+id/already_searchView"
+                android:layout_width="match_parent"
+                app:queryHint="Enter book name here"
+                android:layout_height="wrap_content">
+
+            </android.support.v7.widget.SearchView>
+            <ProgressBar
+                android:id="@+id/login_progress"
+                android:visibility="gone"
+                android:indeterminate="true"
+                android:max="100"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:indeterminateTint="@color/colorPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+            <TextView
+                android:id="@+id/no_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="no results found"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/already_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </android.support.v7.widget.RecyclerView>
+
+        </LinearLayout>
+    </ScrollView>
 </android.support.constraint.ConstraintLayout>
